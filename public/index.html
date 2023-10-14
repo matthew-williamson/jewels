@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -10,34 +10,146 @@
       content="Web site created using create-react-app"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> -->
+    <title>Jewels</title>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <style>
+      select {
+        width: 250px;
+      }
+    </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <div id="root" />
+    <!-- <img
+      src="./images/pendant-fourpetaldiamond.png"
+      style="width: 200px; height: 200px"
+    />
+    <img
+      src="./images/pendant-goldstar.png"
+      style="width: 200px; height: 200px"
+    /> -->
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <!-- <div id="canvas-container"></div> -->
+    <!-- <div style="width: 100%; display: flex; justify-content: center">
+      <div>
+        <div>
+          <span>Chain: </span>
+          <select id="chain-select">
+            <option>Gold</option>
+            <option>Silver</option>
+          </select>
+        </div>
+        <div>
+          <span>Pendant 1: </span>
+          <select id="pendant-1-select">
+            <option>Four Petal Diamond</option>
+            <option>Gold Star</option>
+            <option>Guardian Angel Silver</option>
+            <option>Guardian Angel Gold</option>
+            <option>Jade Bead</option>
+            <option>Mountain Rectangular</option>
+            <option>Placement Bead</option>
+            <option>Three Rings</option>
+          </select>
+        </div>
+        <div>
+          <span>Pendant 2: </span>
+          <select id="pendant-2-select">
+            <option>Four Petal Diamond</option>
+            <option>Gold Star</option>
+            <option>Guardian Angel Silver</option>
+            <option>Guardian Angel Gold</option>
+            <option>Jade Bead</option>
+            <option>Mountain Rectangular</option>
+            <option>Placement Bead</option>
+            <option>Three Rings</option>
+          </select>
+        </div>
+      </div>
+    </div> -->
+    <script>
+      let chainLayer;
+      let pendant1Layer;
+      let pendant2Layer;
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+      const initialSetup = () => {
+        const stage = new Konva.Stage({
+          container: "canvas-container",
+          width: window.innerWidth,
+          height: 900,
+        });
+
+        chainLayer = new Konva.Layer();
+        pendant1Layer = new Konva.Layer();
+        pendant2Layer = new Konva.Layer();
+
+        stage.add(chainLayer);
+        stage.add(pendant1Layer);
+        stage.add(pendant2Layer);
+
+        onChainChange({ target: { value: "gold" } });
+      };
+
+      const loadImageFromUrl = ({ url, x, y, layer, rotate }) => {
+        Konva.Image.fromURL(url, function (node) {
+          node.setAttrs({
+            x,
+            y,
+          });
+          if (rotate) {
+          }
+          layer.add(node);
+          layer.draw();
+        });
+      };
+
+      const onChainChange = (event) => {
+        const chain = event.target.value;
+        const url = `./images/chain-${chain.toLowerCase()}.png`;
+        const existingChainObject = chainLayer.findOne("Image");
+        if (existingChainObject) {
+          existingChainObject.destroy();
+        }
+        loadImageFromUrl({
+          url,
+          x: 0,
+          y: 0,
+          layer: chainLayer,
+        });
+      };
+
+      const onPendantChange = (event, pendantLayer) => {
+        const pendant = event.target.value;
+        const url = `./images/pendant-${pendant
+          .toLowerCase()
+          .replaceAll(" ", "")}.png`;
+        const existingPendantObject = pendantLayer.findOne("Image");
+        if (existingPendantObject) {
+          existingPendantObject.destroy();
+        }
+        loadImageFromUrl({
+          url,
+          x: 20,
+          y: 150,
+          layer: pendantLayer,
+        });
+      };
+
+      const chainSelect = document.getElementById("chain-select");
+      chainSelect.addEventListener("change", onChainChange);
+
+      const pendant1Select = document.getElementById("pendant-1-select");
+      pendant1Select.addEventListener("change", (e) =>
+        onPendantChange(e, pendant1Layer)
+      );
+
+      const pendant2Select = document.getElementById("pendant-2-select");
+      pendant2Select.addEventListener("change", (e) =>
+        onPendantChange(e, pendant2Layer)
+      );
+
+      initialSetup();
+    </script>
   </body>
 </html>
