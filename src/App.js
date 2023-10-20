@@ -25,6 +25,7 @@ function App() {
   const [personalNote, setPersonalNote] = useState("");
   const [centerpiece, setCenterpiece] = useState(alphabet.A);
   const [leftpiece, setLeftpiece] = useState(alphabet.A);
+  const [rightpiece, setRightpiece] = useState(alphabet.A);
   const [chain, setChain] = useState(chains.simpleGold);
   const [letter, setLetter] = useState(alphabet.A);
   const [sign, setSign] = useState(astrologySigns.aquarius);
@@ -33,29 +34,24 @@ function App() {
     // TODO: update price whenever specs change
   }, []);
 
-  const handleCenterpieceChange = useCallback((newCenter) => {
+  const handleOnCenterpieceChange = useCallback((newCenter) => {
     setCenterpiece(newCenter);
   });
 
-  const handleLeftpieceChange = useCallback((newCenter) => {
-    setLeftpiece(newCenter);
+  const handleOnLeftpieceChange = useCallback((newLeft) => {
+    setLeftpiece(newLeft);
   });
 
+  const handleOnRightpieceChange = useCallback((newRight) => {
+    setRightpiece(newRight);
+  });
   const handleOnChainChange = useCallback((newChain) => {
     setChain(newChain);
   }, []);
 
-  const handleOnLetterChange = useCallback((newLetter, location) => {
+  const handleOnLetterChange = useCallback((newLetter) => {
     setSign(null);
-    switch(location){
-      case "center":
-        setCenterpiece(newLetter);
-        break;
-      case"left":
-        setLeftpiece(newLetter);
-        break;
-    }
-    setLetter(newLetter,location);
+    setLetter(newLetter);
   });
 
   const handleOnSignChange = useCallback((newSign) => {
@@ -102,7 +98,7 @@ function App() {
                   />
                 </Layer>
                 <Layer>
-                  {/* pendant */}
+                  {/* center pendant */}
                   <URLImage
                     src={alphabet[centerpiece.id].src}
                     width={300}
@@ -112,7 +108,7 @@ function App() {
                   />
                 </Layer>
                 <Layer>
-                  {/* pendant */}
+                  {/* left pendant */}
                   <URLImage
                     src={alphabet[leftpiece.id].src}
                     width={300}
@@ -120,6 +116,17 @@ function App() {
                     x={115}
                     y={80}
                     rotation={45}
+                  />
+                </Layer>
+                <Layer>
+                  {/* right pendant */}
+                  <URLImage
+                    src={alphabet[rightpiece.id].src}
+                    width={300}
+                    height={300}
+                    x={170}
+                    y={310}
+                    rotation={-50}
                   />
                 </Layer>
               </Stage>
@@ -233,59 +240,6 @@ function App() {
                   }}
                 >
                   <img
-                    src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_398cfa71bd.png&w=720&q=75"
-                    alt="simple gold chain"
-                    objectFit="contain"
-                    width="100%"
-                    height="100%"
-                  />
-                </Box>
-                <Stack
-                  direction="row"
-                  sx={{
-                    flexWrap: "wrap",
-                    width: 316,
-                    height: 100,
-                    borderRadius: 2,
-                    alignItems: "center",
-                  }}
-                >
-                  {Object.values(astrologySigns).map((sign) => (
-                    <Box
-                      key={`sign-${sign.sign}`}
-                      sx={{
-                        borderRadius: 1,
-                        textAlign: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        ":hover": {
-                          backgroundColor: "lightgray",
-                        },
-                      }}
-                      onClick={() => handleOnSignChange(sign)}
-                    >
-                      <Typography
-                        fontSize={25}
-                        sx={{ backgroundColor: "transparent", mx: 0.5 }}
-                      >
-                        {sign.sign}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Stack>
-              <Divider>or</Divider>
-              <Stack spacing={1} direction="row">
-                <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    border: "1px solid lightgray",
-                  }}
-                >
-                  <img
                     src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
                     alt="simple gold chain"
                     objectFit="contain"
@@ -319,7 +273,7 @@ function App() {
                           backgroundColor: "lightgray",
                         },
                       }}
-                      onClick={() => handleCenterpieceChange(letter,"center")}
+                      onClick={() => handleOnCenterpieceChange(letter)}
                     >
                       <Typography>{letter.id}</Typography>
                     </Box>
@@ -375,7 +329,7 @@ function App() {
                           backgroundColor: "lightgray",
                         },
                       }}
-                      onClick={() => handleOnLetterChange(letter,"left")}
+                      onClick={() => handleOnLeftpieceChange(letter)}
                     >
                       <Typography>{letter.id}</Typography>
                     </Box>
@@ -386,7 +340,63 @@ function App() {
           </Paper>
           <Paper sx={{ py: 2, px: 2 }}>
             <Stack spacing={1}>
-              <Typography>Step 3: Decorate your necklace</Typography>
+              <Typography>Step 4: Choose your Rightpiece</Typography>
+              <Stack spacing={1} direction="row">
+                <Box
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    border: "1px solid lightgray",
+                  }}
+                >
+                  <img
+                    src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
+                    alt="simple gold chain"
+                    objectFit="contain"
+                    width="100%"
+                    height="100%"
+                  />
+                </Box>
+                <Stack
+                  direction="row"
+                  sx={{
+                    flexWrap: "wrap",
+                    width: 316,
+                    height: 100,
+                    borderRadius: 2,
+                    alignItems: "center",
+                  }}
+                >
+                  {Object.values(alphabet).map((letter) => (
+                    <Box
+                      key={`letter-${letter.id}`}
+                      sx={{
+                        m: 0.5,
+                        borderRadius: 1,
+                        border: "1px solid lightgray",
+                        width: 25,
+                        height: 25,
+                        textAlign: "center",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        ":hover": {
+                          backgroundColor: "lightgray",
+                        },
+                      }}
+                      onClick={() => handleOnRightpieceChange(letter)}
+                    >
+                      <Typography>{letter.id}</Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Stack>
+            </Stack>
+          </Paper>
+          <Paper sx={{ py: 2, px: 2 }}>
+            <Stack spacing={1}>
+              <Typography>Step 5: Decorate your necklace</Typography>
               <Stack spacing={1} direction="row">
                 <Box
                   sx={{
