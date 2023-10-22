@@ -113,8 +113,8 @@ function App() {
                     src={alphabet[leftpiece.id].src}
                     width={300}
                     height={300}
-                    x={115}
-                    y={80}
+                    x={180}
+                    y={170}
                     rotation={45}
                   />
                 </Layer>
@@ -124,9 +124,9 @@ function App() {
                     src={alphabet[rightpiece.id].src}
                     width={300}
                     height={300}
-                    x={170}
-                    y={310}
-                    rotation={-50}
+                    x={100}
+                    y={380}
+                    rotation={-45}
                   />
                 </Layer>
               </Stage>
