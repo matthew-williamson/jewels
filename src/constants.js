@@ -2,12 +2,12 @@ export const alphabet = {
   A: {
     id: "A",
     name: "A",
-    src: "./images/alpha-a.png",
+    src: "./images/alpha-a2.png",
   },
   B: {
     id: "B",
     name: "B",
-    src: "./images/alpha-B.png",
+    src: "./images/alpha-B2.png",
   },
   C: {
     id: "C",
@@ -204,6 +204,6 @@ export const chains = {
     price: 110,
     id: "elaborateGold",
     name: "Elaborate Gold",
-    src: "./images/chaingoldelaborate.png",
+    src: "./images/chaingoldelaborate2.png",
   },
 };
