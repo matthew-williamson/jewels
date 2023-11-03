@@ -2,17 +2,19 @@ import {
   Box,
   Button,
   Checkbox,
-  Divider,
   Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { Canvas } from "konva/lib/Canvas";
+import React from 'react';
+// import { Canvas } from "konva/lib/Canvas";
 import { useCallback, useEffect, useState } from "react";
 import { Image, Layer, Stage } from "react-konva";
 import useImage from "use-image";
-import { alphabet, astrologySigns, chains } from "./constants";
+import { alphabet, chains } from "./constants";
+import PendantImage from "./Components/PendantImage";
+import PendantSelectionPanel from "./Components/PendantSelectionPanel";
 
 const URLImage = ({ src, height, width, x = 0, y = 0, rotation = 0}) => {
   const [image] = useImage(src);
@@ -28,7 +30,6 @@ function App() {
   const [rightpiece, setRightpiece] = useState(alphabet.A);
   const [chain, setChain] = useState(chains.simpleGold);
   const [letter, setLetter] = useState(alphabet.A);
-  const [sign, setSign] = useState(astrologySigns.aquarius);
 
   useEffect(() => {
     // TODO: update price whenever specs change
@@ -50,13 +51,7 @@ function App() {
   }, []);
 
   const handleOnLetterChange = useCallback((newLetter) => {
-    setSign(null);
     setLetter(newLetter);
-  });
-
-  const handleOnSignChange = useCallback((newSign) => {
-    setLetter(null);
-    setSign(newSign);
   });
 
   const onAddToCartClick = useCallback((e) => {
@@ -97,38 +92,33 @@ function App() {
                     height={600}
                   />
                 </Layer>
-                <Layer>
-                  {/* center pendant */}
-                  <URLImage
-                    src={alphabet[centerpiece.id].src}
-                    width={300}
-                    height={300}
-                    x={100}
-                    y={255}
+                {/*centerpiece*/}
+                <PendantImage
+                newSrc={alphabet[centerpiece.id].src}
+                newWidth={300}
+                newHeight={300}
+                newX={100}
+                newY={255}
+                newRotation={0}                
+                />
+                {/*leftpiece*/}
+                <PendantImage
+                    newSrc={alphabet[leftpiece.id].src}
+                    newWidth={300}
+                    newHeight={300}
+                    newX={180}
+                    newY={170}
+                    newRotation={45}
                   />
-                </Layer>
-                <Layer>
-                  {/* left pendant */}
-                  <URLImage
-                    src={alphabet[leftpiece.id].src}
-                    width={300}
-                    height={300}
-                    x={180}
-                    y={170}
-                    rotation={45}
+                  {/*rightpiece*/}
+                  <PendantImage
+                    newSrc={alphabet[rightpiece.id].src}
+                    newWidth={300}
+                    newHeight={300}
+                    newX={100}
+                    newY={380}
+                    newRotation={-45}
                   />
-                </Layer>
-                <Layer>
-                  {/* right pendant */}
-                  <URLImage
-                    src={alphabet[rightpiece.id].src}
-                    width={300}
-                    height={300}
-                    x={100}
-                    y={380}
-                    rotation={-45}
-                  />
-                </Layer>
               </Stage>
             </Box>
             <Stack direction="row" sx={{ justifyContent: "space-between" }}>
@@ -226,62 +216,11 @@ function App() {
               </Stack>
             </Stack>          
           </Paper>
-          <Paper sx={{ py: 2, px: 2 }}>
-            <Stack spacing={1}>
-              <Typography>Step 2: Choose your centerpiece</Typography>
-              <Stack spacing={1} direction="row">
-                <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    border: "1px solid lightgray",
-                  }}
-                >
-                  <img
-                    src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
-                    alt="simple gold chain"
-                    objectFit="contain"
-                    width="100%"
-                    height="100%"
-                  />
-                </Box>
-                <Stack
-                  direction="row"
-                  sx={{
-                    flexWrap: "wrap",
-                    width: 316,
-                    height: 100,
-                    borderRadius: 2,
-                    alignItems: "center",
-                  }}
-                >
-                  {Object.values(alphabet).map((letter) => (
-                    <Box
-                      key={`letter-${letter.id}`}
-                      sx={{
-                        m: 0.5,
-                        borderRadius: 1,
-                        border: "1px solid lightgray",
-                        width: 25,
-                        height: 25,
-                        textAlign: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        ":hover": {
-                          backgroundColor: "lightgray",
-                        },
-                      }}
-                      onClick={() => handleOnCenterpieceChange(letter)}
-                    >
-                      <Typography>{letter.id}</Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Stack>
-            </Stack>
-          </Paper>
+          <PendantSelectionPanel
+            DisplayText={"Step 2: Choose your centerpiece"}
+            // onPendantChange={this.handleOnCenterpieceChange}
+          />
+          
           <Paper sx={{ py: 2, px: 2 }}>
             <Stack spacing={1}>
               <Typography>Step 3: Choose your Leftpiece</Typography>

@@ -3,13 +3,13 @@ import { Grid } from "@mui/material";
 import SelectableItem from "./SelectableItem.tsx";
 
 const chainItems = [
-  { image: "./images/chain-gold.png", title: "Gold" },
-  { image: "./images/chain-silver.png", title: "Silver" },
+  { image: "./images/Chains/chain-gold.png", title: "Gold" },
+  { image: "./images/Chains/chain-silver.png", title: "Silver" },
 ];
 
 const pendantItems = [
-  { image: "./images/pendant-goldstar.png", title: "Gold Star" },
-  { image: "./images/pendant-jadebead.png", title: "Silver" },
+  { image: "./images/Pendants/pendant-goldstar.png", title: "Gold Star" },
+  { image: "./images/Pendants/pendant-jadebead.png", title: "Silver" },
 ];
 
 const SelectMenu: React.FC = ({ type }: { type: string }) => {
