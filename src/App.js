@@ -9,14 +9,14 @@ import {
 } from "@mui/material";
 import React from 'react';
 // import { Canvas } from "konva/lib/Canvas";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Image, Layer, Stage } from "react-konva";
 import useImage from "use-image";
 import { alphabet, chains } from "./constants";
 import PendantImage from "./Components/PendantImage";
 import PendantSelectionPanel from "./Components/PendantSelectionPanel";
 
-const URLImage = ({ src, height, width, x = 0, y = 0, rotation = 0}) => {
+const URLImage = ({ src, height, width, x = 0, y = 0, rotation = 0 }) => {
   const [image] = useImage(src);
   return <Image image={image} height={height} width={width} x={x} y={y} rotation={rotation} />;
 };
@@ -31,10 +31,14 @@ function App() {
   const [chain, setChain] = useState(chains.simpleGold);
   const [letter, setLetter] = useState(alphabet.A);
 
-  useEffect(() => {
-    // TODO: update price whenever specs change
-  }, []);
 
+  //useEffect only runs setPrice when [] list updates any values
+  useEffect(() => {
+    setPrice(chain.price + centerpiece.price + leftpiece.price + rightpiece.price);
+  }, [chain.price, centerpiece.price, leftpiece.price, rightpiece.price]);
+
+  //useCallback only calculates function (input,output dictionary values) 
+  //when a dependency value changes
   const handleOnCenterpieceChange = useCallback((newCenter) => {
     setCenterpiece(newCenter);
   });
@@ -94,31 +98,31 @@ function App() {
                 </Layer>
                 {/*centerpiece*/}
                 <PendantImage
-                newSrc={alphabet[centerpiece.id].src}
-                newWidth={300}
-                newHeight={300}
-                newX={100}
-                newY={255}
-                newRotation={0}                
+                  newSrc={alphabet[centerpiece.id].src}
+                  newWidth={300}
+                  newHeight={300}
+                  newX={100}
+                  newY={255}
+                  newRotation={0}
                 />
                 {/*leftpiece*/}
                 <PendantImage
-                    newSrc={alphabet[leftpiece.id].src}
-                    newWidth={300}
-                    newHeight={300}
-                    newX={180}
-                    newY={170}
-                    newRotation={45}
-                  />
-                  {/*rightpiece*/}
-                  <PendantImage
-                    newSrc={alphabet[rightpiece.id].src}
-                    newWidth={300}
-                    newHeight={300}
-                    newX={100}
-                    newY={380}
-                    newRotation={-45}
-                  />
+                  newSrc={alphabet[leftpiece.id].src}
+                  newWidth={300}
+                  newHeight={300}
+                  newX={180}
+                  newY={170}
+                  newRotation={45}
+                />
+                {/*rightpiece*/}
+                <PendantImage
+                  newSrc={alphabet[rightpiece.id].src}
+                  newWidth={300}
+                  newHeight={300}
+                  newX={100}
+                  newY={380}
+                  newRotation={-45}
+                />
               </Stage>
             </Box>
             <Stack direction="row" sx={{ justifyContent: "space-between" }}>
@@ -214,13 +218,13 @@ function App() {
                   }}
                 />
               </Stack>
-            </Stack>          
+            </Stack>
           </Paper>
           <PendantSelectionPanel
-            DisplayText={"Step 2: Choose your centerpiece"}
-            // onPendantChange={this.handleOnCenterpieceChange}
+            displayText={"Step 2: Choose your centerpiece"}
+            onPendantChange={handleOnCenterpieceChange}
           />
-          
+
           <Paper sx={{ py: 2, px: 2 }}>
             <Stack spacing={1}>
               <Typography>Step 3: Choose your Leftpiece</Typography>
