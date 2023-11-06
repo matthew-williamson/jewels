@@ -34,8 +34,8 @@ function App() {
 
   //useEffect only runs setPrice when [] list updates any values
   useEffect(() => {
-    setPrice(chain.price + centerpiece.price + leftpiece.price + rightpiece.price);
-  }, [chain.price, centerpiece.price, leftpiece.price, rightpiece.price]);
+    setPrice(chain.price + centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
+  }, [chain.price, centerpiece.price, leftpiece.price, rightpiece.price, isAddingPersonalNote]);
 
   //useCallback only calculates function (input,output dictionary values) 
   //when a dependency value changes
@@ -63,11 +63,11 @@ function App() {
   }, []);
 
   const handleAddPersonalNoteChange = useCallback((e) => {
-    console.log("TODO");
-  }, []);
+    setIsAddingPersonalNote(e.target.checked);
+  });
 
   const handlePersonalNoteChange = useCallback((e) => {
-    console.log("TODO");
+    setPersonalNote(e.target.value);
   }, []);
 
   return (
@@ -167,7 +167,7 @@ function App() {
                   onClick={() => handleOnChainChange(chains.simpleGold)}
                 >
                   <img
-                    src="./images/chaingold.png"
+                    src="./images/Chains/chaingold.png"
                     alt="simple gold chain"
                     objectFit="cover"
                     width="100%"
@@ -194,7 +194,7 @@ function App() {
                   onClick={() => handleOnChainChange(chains.elaborateGold)}
                 >
                   <img
-                    src="./images/chaingoldelaborate2.png"
+                    src="./images/Chains/chaingoldelaborate2.png"
                     alt="simple gold chain"
                     objectFit="cover"
                     width="100%"
@@ -224,119 +224,14 @@ function App() {
             displayText={"Step 2: Choose your centerpiece"}
             onPendantChange={handleOnCenterpieceChange}
           />
-
-          <Paper sx={{ py: 2, px: 2 }}>
-            <Stack spacing={1}>
-              <Typography>Step 3: Choose your Leftpiece</Typography>
-              <Stack spacing={1} direction="row">
-                <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    border: "1px solid lightgray",
-                  }}
-                >
-                  <img
-                    src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
-                    alt="simple gold chain"
-                    objectFit="contain"
-                    width="100%"
-                    height="100%"
-                  />
-                </Box>
-                <Stack
-                  direction="row"
-                  sx={{
-                    flexWrap: "wrap",
-                    width: 316,
-                    height: 100,
-                    borderRadius: 2,
-                    alignItems: "center",
-                  }}
-                >
-                  {Object.values(alphabet).map((letter) => (
-                    <Box
-                      key={`letter-${letter.id}`}
-                      sx={{
-                        m: 0.5,
-                        borderRadius: 1,
-                        border: "1px solid lightgray",
-                        width: 25,
-                        height: 25,
-                        textAlign: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        ":hover": {
-                          backgroundColor: "lightgray",
-                        },
-                      }}
-                      onClick={() => handleOnLeftpieceChange(letter)}
-                    >
-                      <Typography>{letter.id}</Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Stack>
-            </Stack>
-          </Paper>
-          <Paper sx={{ py: 2, px: 2 }}>
-            <Stack spacing={1}>
-              <Typography>Step 4: Choose your Rightpiece</Typography>
-              <Stack spacing={1} direction="row">
-                <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    border: "1px solid lightgray",
-                  }}
-                >
-                  <img
-                    src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
-                    alt="simple gold chain"
-                    objectFit="contain"
-                    width="100%"
-                    height="100%"
-                  />
-                </Box>
-                <Stack
-                  direction="row"
-                  sx={{
-                    flexWrap: "wrap",
-                    width: 316,
-                    height: 100,
-                    borderRadius: 2,
-                    alignItems: "center",
-                  }}
-                >
-                  {Object.values(alphabet).map((letter) => (
-                    <Box
-                      key={`letter-${letter.id}`}
-                      sx={{
-                        m: 0.5,
-                        borderRadius: 1,
-                        border: "1px solid lightgray",
-                        width: 25,
-                        height: 25,
-                        textAlign: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        ":hover": {
-                          backgroundColor: "lightgray",
-                        },
-                      }}
-                      onClick={() => handleOnRightpieceChange(letter)}
-                    >
-                      <Typography>{letter.id}</Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Stack>
-            </Stack>
-          </Paper>
+          <PendantSelectionPanel
+            displayText={"Step 3: Choose your leftpiece"}
+            onPendantChange={handleOnLeftpieceChange}
+          />
+          <PendantSelectionPanel
+            displayText={"Step 4: Choose your rightpiece"}
+            onPendantChange={handleOnRightpieceChange}
+          />
           <Paper sx={{ py: 2, px: 2 }}>
             <Stack spacing={1}>
               <Typography>Step 5: Decorate your necklace</Typography>
