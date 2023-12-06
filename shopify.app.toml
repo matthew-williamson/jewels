@@ -2,19 +2,19 @@
 
 name = "jewelery-customizer"
 client_id = "ca7fdd742942060d1df68ad05994e403"
-application_url = "https://chambers-redeem-curriculum-compact.trycloudflare.com"
+application_url = "https://sec-leader-oakland-four.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_products"
+scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://chambers-redeem-curriculum-compact.trycloudflare.com/auth/callback",
-  "https://chambers-redeem-curriculum-compact.trycloudflare.com/auth/shopify/callback",
-  "https://chambers-redeem-curriculum-compact.trycloudflare.com/api/auth/callback",
-  "https://chambers-redeem-curriculum-compact.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://sec-leader-oakland-four.trycloudflare.com/auth/callback",
+  "https://sec-leader-oakland-four.trycloudflare.com/auth/shopify/callback",
+  "https://sec-leader-oakland-four.trycloudflare.com/api/auth/callback",
+  "https://sec-leader-oakland-four.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

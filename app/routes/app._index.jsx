@@ -39,44 +39,24 @@ export const loader = async ({ request }) => {
 };
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
   const response = await admin.graphql(
     `#graphql
-      mutation populateProduct($input: ProductInput!) {
-        productCreate(input: $input) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
+    query getProducts {
+    products (first: 3) {
+      edges {
+        node {
+          id
+          title
         }
-      }`,
-    // {
-    //   variables: {
-    //     input: {
-    //       title: `${color} Snowboard`,
-    //       variants: [{ price: Math.random() * 100 }],
-    //     },
-    //   },
-    // }
+      }
+    }
+  }`,
   );
   const responseJson = await response.json();
-
+  console.log("teststuff");
+  console.log(responseJson);
   return json({
-    product: responseJson.data.productCreate.product,
+    product: responseJson.data.products,
   });
 };
 
@@ -84,18 +64,12 @@ export default function Index() {
   const nav = useNavigation();
   const actionData = useActionData();
   const submit = useSubmit();
-  console.log("pretest");
   const isLoading =
     ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
-  console.log(actionData);
-  console.log(actionData?.product);
-  const productId = actionData?.product?.id.replace(
-    "gid://shopify/Product/",
-    ""
-  );
-  console.log(productId);
-  console.log("posttest");
-
+  // const productId = actionData?.product?.first.id.replace(
+  //   "gid://shopify/Product/",
+  //   ""
+  // );
   const [price, setPrice] = useState(99);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
@@ -136,6 +110,7 @@ export default function Index() {
 
   const onAddToCartClick = useCallback((e) => {
     console.log("TODO");
+    submit();
   }, []);
 
   const handleAddPersonalNoteChange = useCallback((e) => {
@@ -147,15 +122,15 @@ export default function Index() {
   }, []);
 
 
-  useEffect(() => {
-    if (productId) {
-      shopify.toast.show("Product created");
-    }
-  }, [productId]);
+  // useEffect(() => {
+  //   if (productId) {
+  //     shopify.toast.show("Product created");
+  //   }
+  // }, [productId]);
   const generateProduct = () => submit({}, { replace: true, method: "POST" });
-
+  // const LoadPage = () => submit({}, { replace: true, method: "POST" });
   return (
-    <Page>
+    <Page >
       <ui-title-bar title="Remix app template">
 
       </ui-title-bar>
@@ -220,7 +195,7 @@ export default function Index() {
                       </Box>
                       <Stack direction="row" sx={{ justifyContent: "space-between" }}>
                         <Typography>Price: ${price}</Typography>
-                        <Button onClick={onAddToCartClick} variant="outlined">
+                        <Button onClick={generateProduct} variant="outlined">
                           Add to Cart
                         </Button>
                       </Stack>
