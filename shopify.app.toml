@@ -2,7 +2,7 @@
 
 name = "jewelery-customizer"
 client_id = "ca7fdd742942060d1df68ad05994e403"
-application_url = "https://sonic-strip-pipes-pci.trycloudflare.com"
+application_url = "https://arthur-puzzle-playstation-sailing.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://sonic-strip-pipes-pci.trycloudflare.com/auth/callback",
-  "https://sonic-strip-pipes-pci.trycloudflare.com/auth/shopify/callback",
-  "https://sonic-strip-pipes-pci.trycloudflare.com/api/auth/callback",
-  "https://sonic-strip-pipes-pci.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://arthur-puzzle-playstation-sailing.trycloudflare.com/auth/callback",
+  "https://arthur-puzzle-playstation-sailing.trycloudflare.com/auth/shopify/callback",
+  "https://arthur-puzzle-playstation-sailing.trycloudflare.com/api/auth/callback",
+  "https://arthur-puzzle-playstation-sailing.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

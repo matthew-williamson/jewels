@@ -40,66 +40,72 @@ export const loader = async ({ request }) => {
 };
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
-  const response = await admin.graphql(
+  const chainResponse = await admin.graphql(
     `#graphql
-    # query getProducts {
-    # products (first: 100) {
-    #   edges {
-    #     node {
-    #       id
-    #       title
-    #     }
-    #   }
-    # }
-query {
-  # collections(first: 5) {
-  #   edges {
-  #     node {
-  #       id
-  #       title
-  #       handle	id
-  #       products(first: 250) {
-  #         edges {
-  #           node {
-  #             id
-  #           }
-  #         }
-  #       }
-  #     }
-  #   }
-  
-  collectionByHandle(handle: "chains") {
-        id
-        title
-        handle
-        products(first: 250) {
-          edges {
-            node {
-              id
-              title              
-              featuredImage{
-                altText
-                url
-              }
+  query {
+    collectionByHandle(handle: "chains") {
+      id
+      title
+      handle
+      products(first: 250) {
+        edges {
+         node {
+            id
+            title              
+            featuredImage{
+              altText
+              url
             }
           }
         }
-
-  }
-    
+      }
+    }    
   }`,
   );
-  const responseJson = await response.json();
+  const responseJson = await chainResponse.json();
   console.log("teststuff");
   console.log(responseJson);
   return json({
     product: responseJson.data.collectionByHandle,
   });
 };
-
+export const chainLoad = async ({ request }) => {
+  const { admin } = await authenticate.admin(request);
+  const chainResponse = await admin.graphql(
+    `#graphql
+  query {
+    collectionByHandle(handle: "chains") {
+      id
+      title
+      handle
+      products(first: 250) {
+        edges {
+         node {
+            id
+            title              
+            featuredImage{
+              altText
+              url
+            }
+          }
+        }
+      }
+    }    
+  }`,
+  );
+  const responseJson = await chainResponse.json();
+  console.log("teststuff");
+  console.log(responseJson);
+  return json({
+    product: responseJson.data.collectionByHandle,
+  });
+};
 export default function Index() {
   const nav = useNavigation();
   const actionData = useActionData();
+  // const actionData = GetChains();
+
+  const chianData = chainLoad({}, { replace: true, method: "POST" });
   const submit = useSubmit();
   const isLoading =
     ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
@@ -110,6 +116,10 @@ export default function Index() {
     const { id } = product.node;
     return { id, url };
   }
+
+  const generateProduct = () => submit({}, { replace: true, method: "POST" });
+
+
   const UpdateChainUrls = () => {
     if (actionData == null || actionData.product == null ||
       actionData.product.products == null ||
@@ -119,10 +129,17 @@ export default function Index() {
     // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
     return actionData.product.products.edges.map(selectProductUrlImages);
   }
+  var chains = UpdateChainUrls();
+  // useEffect(() => {
+  //   action({}, { replace: true, method: "POST" });
 
-  const chains = UpdateChainUrls();
+  // });
 
-
+  useEffect(() => {
+    if (actionData) {
+      chains = UpdateChainUrls();
+    }
+  }, [actionData]);
 
   const [price, setPrice] = useState(99);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
@@ -177,15 +194,6 @@ export default function Index() {
     setPersonalNote(e.target.value);
   }, []);
 
-
-  // useEffect(() => {
-  //   console.log("inProductUseEffect");
-  //   console.log(productId);
-  //   if (productId) {
-  //     shopify.toast.show("Product created");
-  //   }
-  // }, [productId]);
-
   useEffect(() => {
     if (chains) {
       console.log("chains updated");
@@ -193,7 +201,6 @@ export default function Index() {
     }
   }, [chains]);
 
-  const generateProduct = () => submit({}, { replace: true, method: "POST" });
   // const LoadPage = () => submit({}, { replace: true, method: "POST" });
   return (
     <Page >
@@ -283,99 +290,35 @@ export default function Index() {
                       <BlockStack spacing={1}>
                         <Typography>Step 1: Choose your chain</Typography>
                         <BlockStack spacing={1} direction="row">
-                          {Object.values(chains).map((ch) => (
-                            <Box
-                              key={`chain-${ch.id}`}
-                              sx={{
-                                m: 0.5,
-                                borderRadius: 1,
-                                border: "1px solid lightgray",
-                                width: 25,
-                                height: 25,
-                                textAlign: "center",
-                                alignItems: "center",
-                                cursor: "pointer",
-                                ":hover": {
-                                  backgroundColor: "lightgray",
-                                },
-                              }}
-                              onClick={() => handleOnChainChange(ch)}
-                            >
-                              <Typography>{ch.id}</Typography>
-                            </Box>
-                          ))}
-                          {/* <Box
-                            sx={{
-                              width: 100,
-                              height: 100,
-                              backgroundColor: "gray",
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              border:
-                                "1px solid teal",
-                              // chain.id === "simpleGold"
-                              //   ? "1px solid teal"
-                              //   : "1px solid lightgray",
-                              cursor: "pointer",
-                              ":hover": {
-                                backgroundColor: "lightgray",
-                                boxShadow: "0 0 0 1px lightgray",
-                              },
-                            }}
-                          onClick={() => handleOnChainChange(chains[0])}
-                          >
-                            <img
-                              src="./images/Chains/chaingold.png"
-                              alt="simple gold chain"
-                              objectFit="cover"
-                              width="100%"
-                              height="100%"
-                            />
-                          </Box>
-                          <Box
-                            sx={{
-                              width: 100,
-                              height: 100,
-                              backgroundColor: "gray",
-                              border:
-                                // chain.id === "elaborateGold"
-                                //   ? "1px solid teal"
-                                //   : "1px solid lightgray",
-                                "1px solid teal",
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              cursor: "pointer",
-                              ":hover": {
-                                backgroundColor: "lightgray",
-                                boxShadow: "0 0 0 1px lightgray",
-                              },
-                            }}
-                          // onClick={() => handleOnChainChange(chains.elaborateGold)}
-                          >
-                            <img
-                              src="./images/Chains/chaingoldelaborate2.png"
-                              alt="simple gold chain"
-                              objectFit="cover"
-                              width="100%"
-                              height="100%"
-                            />
-                          </Box>
-                          <Box
-                            sx={{
-                              width: 100,
-                              height: 100,
-                              backgroundColor: "gray",
-                              borderRadius: 2,
-                            }}
-                          />
-                          <Box
-                            sx={{
-                              width: 100,
-                              height: 100,
-                              backgroundColor: "gray",
-                              borderRadius: 2,
-                            }}
-                          /> */}
+                          <Stack spacing={1} direction="row">
+                            {Object.values(chains).map((ch) => (
+                              <Box
+                                key={`chain-${ch.id}`}
+                                sx={{
+                                  m: 0.5,
+                                  borderRadius: 1,
+                                  border: "1px solid lightgray",
+                                  width: 25,
+                                  height: 25,
+                                  textAlign: "center",
+                                  alignItems: "center",
+                                  cursor: "pointer",
+                                  ":hover": {
+                                    backgroundColor: "lightgray",
+                                  },
+                                }}
+                                onClick={() => handleOnChainChange(ch)}
+                              >
+                                <img
+                                  src={ch.url}
+                                  alt={ch.id}
+                                  objectFit="cover"
+                                  width="100%"
+                                  height="100%"
+                                />
+                              </Box>
+                            ))}
+                          </Stack>
                         </BlockStack>
                       </BlockStack>
                     </Paper>
