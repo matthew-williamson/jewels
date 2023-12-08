@@ -19,10 +19,11 @@ import {
   Stack,
   TextField,
   Typography,
+  collapseClasses,
 } from "@mui/material";
 import { Image, Layer, Stage } from "react-konva";
 import { authenticate } from "../shopify.server";
-import { alphabet, chains } from "../constants";
+import { alphabet } from "../constants";
 import PendantImage from "../PendantImage";
 import PendantSelectionPanel from "../PendantSelectionPanel";
 import useImage from "use-image";
@@ -41,22 +42,58 @@ export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
   const response = await admin.graphql(
     `#graphql
-    query getProducts {
-    products (first: 3) {
-      edges {
-        node {
-          id
-          title
+    # query getProducts {
+    # products (first: 100) {
+    #   edges {
+    #     node {
+    #       id
+    #       title
+    #     }
+    #   }
+    # }
+query {
+  # collections(first: 5) {
+  #   edges {
+  #     node {
+  #       id
+  #       title
+  #       handle	id
+  #       products(first: 250) {
+  #         edges {
+  #           node {
+  #             id
+  #           }
+  #         }
+  #       }
+  #     }
+  #   }
+  
+  collectionByHandle(handle: "chains") {
+        id
+        title
+        handle
+        products(first: 250) {
+          edges {
+            node {
+              id
+              title              
+              featuredImage{
+                altText
+                url
+              }
+            }
+          }
         }
-      }
-    }
+
+  }
+    
   }`,
   );
   const responseJson = await response.json();
   console.log("teststuff");
   console.log(responseJson);
   return json({
-    product: responseJson.data.products,
+    product: responseJson.data.collectionByHandle,
   });
 };
 
@@ -66,19 +103,38 @@ export default function Index() {
   const submit = useSubmit();
   const isLoading =
     ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
-  // const productId = actionData?.product?.first.id.replace(
-  //   "gid://shopify/Product/",
-  //   ""
-  // );
+
+  function selectProductUrlImages(product) {
+    if (product == null || product.node == null) return null;
+    const { url } = product.node?.featuredImage;
+    const { id } = product.node;
+    return { id, url };
+  }
+  const UpdateChainUrls = () => {
+    if (actionData == null || actionData.product == null ||
+      actionData.product.products == null ||
+      actionData.product.products.edges == null) {
+      return [];
+    }
+    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
+    return actionData.product.products.edges.map(selectProductUrlImages);
+  }
+
+  const chains = UpdateChainUrls();
+
+
+
   const [price, setPrice] = useState(99);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
   const [centerpiece, setCenterpiece] = useState(alphabet.A);
   const [leftpiece, setLeftpiece] = useState(alphabet.A);
   const [rightpiece, setRightpiece] = useState(alphabet.A);
-  const [chain, setChain] = useState(chains.simpleGold);
+  const [chain, setChain] = useState(chains == null ? null : chains[0]);
   const [letter, setLetter] = useState(alphabet.A);
 
+
+  // const chain = chains == null ? null : chains[0];
   //useEffect only runs setPrice when [] list updates any values
   useEffect(() => {
     setPrice(centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
@@ -101,7 +157,7 @@ export default function Index() {
     setRightpiece(newRight);
   });
   const handleOnChainChange = useCallback((newChain) => {
-    // setChain(newChain);
+    setChain(newChain);
   }, []);
 
   const handleOnLetterChange = useCallback((newLetter) => {
@@ -123,10 +179,20 @@ export default function Index() {
 
 
   // useEffect(() => {
+  //   console.log("inProductUseEffect");
+  //   console.log(productId);
   //   if (productId) {
   //     shopify.toast.show("Product created");
   //   }
   // }, [productId]);
+
+  useEffect(() => {
+    if (chains) {
+      console.log("chains updated");
+      console.log(chains);
+    }
+  }, [chains]);
+
   const generateProduct = () => submit({}, { replace: true, method: "POST" });
   // const LoadPage = () => submit({}, { replace: true, method: "POST" });
   return (
@@ -159,7 +225,7 @@ export default function Index() {
                           <Layer>
                             {/* chain */}
                             <URLImage
-                              src={chains[chain.id].src}
+                              src={chain?.url}
                               width={500}
                               height={600}
                             />
@@ -217,7 +283,28 @@ export default function Index() {
                       <BlockStack spacing={1}>
                         <Typography>Step 1: Choose your chain</Typography>
                         <BlockStack spacing={1} direction="row">
-                          <Box
+                          {Object.values(chains).map((ch) => (
+                            <Box
+                              key={`chain-${ch.id}`}
+                              sx={{
+                                m: 0.5,
+                                borderRadius: 1,
+                                border: "1px solid lightgray",
+                                width: 25,
+                                height: 25,
+                                textAlign: "center",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                ":hover": {
+                                  backgroundColor: "lightgray",
+                                },
+                              }}
+                              onClick={() => handleOnChainChange(ch)}
+                            >
+                              <Typography>{ch.id}</Typography>
+                            </Box>
+                          ))}
+                          {/* <Box
                             sx={{
                               width: 100,
                               height: 100,
@@ -225,16 +312,17 @@ export default function Index() {
                               borderRadius: 2,
                               overflow: "hidden",
                               border:
-                                chain.id === "simpleGold"
-                                  ? "1px solid teal"
-                                  : "1px solid lightgray",
+                                "1px solid teal",
+                              // chain.id === "simpleGold"
+                              //   ? "1px solid teal"
+                              //   : "1px solid lightgray",
                               cursor: "pointer",
                               ":hover": {
                                 backgroundColor: "lightgray",
                                 boxShadow: "0 0 0 1px lightgray",
                               },
                             }}
-                          // onClick={() => handleOnChainChange(chains.simpleGold)}
+                          onClick={() => handleOnChainChange(chains[0])}
                           >
                             <img
                               src="./images/Chains/chaingold.png"
@@ -250,9 +338,10 @@ export default function Index() {
                               height: 100,
                               backgroundColor: "gray",
                               border:
-                                chain.id === "elaborateGold"
-                                  ? "1px solid teal"
-                                  : "1px solid lightgray",
+                                // chain.id === "elaborateGold"
+                                //   ? "1px solid teal"
+                                //   : "1px solid lightgray",
+                                "1px solid teal",
                               borderRadius: 2,
                               overflow: "hidden",
                               cursor: "pointer",
@@ -286,10 +375,14 @@ export default function Index() {
                               backgroundColor: "gray",
                               borderRadius: 2,
                             }}
-                          />
+                          /> */}
                         </BlockStack>
                       </BlockStack>
                     </Paper>
+                    <PendantSelectionPanel
+                      displayText={"Step 2: Choose your centerpiece"}
+                      onPendantChange={handleOnCenterpieceChange}
+                    />
                   </BlockStack>
                 </Layout.Section>
               </Layout>
