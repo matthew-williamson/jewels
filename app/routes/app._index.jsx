@@ -51,7 +51,15 @@ export const action = async ({ request }) => {
         edges {
          node {
             id
-            title              
+            title
+            priceRangeV2 {
+              maxVariantPrice {
+                amount
+              }
+              minVariantPrice {
+                amount
+              }
+            }
             featuredImage{
               altText
               url
@@ -63,49 +71,15 @@ export const action = async ({ request }) => {
   }`,
   );
   const responseJson = await chainResponse.json();
-  console.log("teststuff");
   console.log(responseJson);
   return json({
     product: responseJson.data.collectionByHandle,
   });
 };
-export const chainLoad = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-  const chainResponse = await admin.graphql(
-    `#graphql
-  query {
-    collectionByHandle(handle: "chains") {
-      id
-      title
-      handle
-      products(first: 250) {
-        edges {
-         node {
-            id
-            title              
-            featuredImage{
-              altText
-              url
-            }
-          }
-        }
-      }
-    }    
-  }`,
-  );
-  const responseJson = await chainResponse.json();
-  console.log("teststuff");
-  console.log(responseJson);
-  return json({
-    product: responseJson.data.collectionByHandle,
-  });
-};
+
 export default function Index() {
   const nav = useNavigation();
   const actionData = useActionData();
-  // const actionData = GetChains();
-
-  const chianData = chainLoad({}, { replace: true, method: "POST" });
   const submit = useSubmit();
   const isLoading =
     ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
@@ -114,11 +88,9 @@ export default function Index() {
     if (product == null || product.node == null) return null;
     const { url } = product.node?.featuredImage;
     const { id } = product.node;
-    return { id, url };
+    const { amount } = product.node.priceRangeV2.minVariantPrice;
+    return { id, amount, url };
   }
-
-  const generateProduct = () => submit({}, { replace: true, method: "POST" });
-
 
   const UpdateChainUrls = () => {
     if (actionData == null || actionData.product == null ||
@@ -129,17 +101,13 @@ export default function Index() {
     // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
     return actionData.product.products.edges.map(selectProductUrlImages);
   }
-  var chains = UpdateChainUrls();
-  // useEffect(() => {
-  //   action({}, { replace: true, method: "POST" });
-
-  // });
-
+  const generateProduct = () => submit({}, { replace: true, method: "POST" });
   useEffect(() => {
-    if (actionData) {
-      chains = UpdateChainUrls();
-    }
-  }, [actionData]);
+    generateProduct();
+  }, []);
+
+  var chains = UpdateChainUrls();
+
 
   const [price, setPrice] = useState(99);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
@@ -147,24 +115,20 @@ export default function Index() {
   const [centerpiece, setCenterpiece] = useState(alphabet.A);
   const [leftpiece, setLeftpiece] = useState(alphabet.A);
   const [rightpiece, setRightpiece] = useState(alphabet.A);
-  const [chain, setChain] = useState(chains == null ? null : chains[0]);
+  const [chain, setChain] = useState(chains == null || chains.length == 0 ? { id: '', url: '', amount: 0 } : chains[0]);
   const [letter, setLetter] = useState(alphabet.A);
 
 
-  // const chain = chains == null ? null : chains[0];
   //useEffect only runs setPrice when [] list updates any values
   useEffect(() => {
-    setPrice(centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
-  }, [centerpiece.price, leftpiece.price, rightpiece.price, isAddingPersonalNote]);
-
-  //   setPrice(chain.price + centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
-  // }, [chain.price, centerpiece.price, leftpiece.price, rightpiece.price, isAddingPersonalNote]);
+    setPrice(chain.amount + centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
+  }, [chain.amount, centerpiece.price, leftpiece.price, rightpiece.price, isAddingPersonalNote]);
 
   //useCallback only calculates function (input,output dictionary values)
   //when a dependency value changes
   const handleOnCenterpieceChange = useCallback((newCenter) => {
     setCenterpiece(newCenter);
-  });
+  }, []);
 
   const handleOnLeftpieceChange = useCallback((newLeft) => {
     setLeftpiece(newLeft);
@@ -188,22 +152,27 @@ export default function Index() {
 
   const handleAddPersonalNoteChange = useCallback((e) => {
     setIsAddingPersonalNote(e.target.checked);
-  });
+  }, []);
 
   const handlePersonalNoteChange = useCallback((e) => {
     setPersonalNote(e.target.value);
   }, []);
-
+  function test() {
+    if (!chain || chain.id == '') {
+      setChain(chains[0]);
+    }
+  }
   useEffect(() => {
-    if (chains) {
+    if (chains.length > 0) {
       console.log("chains updated");
       console.log(chains);
+      test()
     }
   }, [chains]);
 
   // const LoadPage = () => submit({}, { replace: true, method: "POST" });
   return (
-    <Page >
+    <Paper >
       <ui-title-bar title="Remix app template">
 
       </ui-title-bar>
@@ -268,7 +237,7 @@ export default function Index() {
                       </Box>
                       <Stack direction="row" sx={{ justifyContent: "space-between" }}>
                         <Typography>Price: ${price}</Typography>
-                        <Button onClick={generateProduct} variant="outlined">
+                        <Button onClick={onAddToCartClick} variant="outlined">
                           Add to Cart
                         </Button>
                       </Stack>
@@ -333,6 +302,6 @@ export default function Index() {
           </Paper>
         </Layout>
       </BlockStack>
-    </Page>
+    </Paper>
   );
 }
