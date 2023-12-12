@@ -5,44 +5,22 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { alphabet } from "./constants";
+import {
+    BlockStack,
+} from "@shopify/polaris";
 
-const PendantSelectionPanel = ({ displayText, onPendantChange }) => {
+const PendantSelectionPanel = ({ displayText, pendantOptions, onPendantChange }) => {
     return (
         <Paper sx={{ py: 2, px: 2 }}>
-            <Stack spacing={1}>
+            <BlockStack spacing={1}>
                 <Typography>{displayText}</Typography>
-                <Stack spacing={1} direction="row">
-                    <Box
-                        sx={{
-                            width: 100,
-                            height: 100,
-                            borderRadius: 2,
-                            overflow: "hidden",
-                            border: "1px solid lightgray",
-                        }}
-                    >
-                        <img
-                            src="https://7879.co/_next/image?url=https%3A%2F%2Fmedia.7879.co%2Fcontent%2F1_0f439b6a79.png&w=720&q=75"
-                            alt="simple gold chain"
-                            objectFit="contain"
-                            width="100%"
-                            height="100%"
-                        />
-                    </Box>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            flexWrap: "wrap",
-                            width: 316,
-                            height: 100,
-                            borderRadius: 2,
-                            alignItems: "center",
-                        }}
-                    >
-                        {Object.values(alphabet).map((letter) => (
+                <BlockStack spacing={1} direction="row">
+
+                    {Object.values(pendantOptions)
+                        .sort((a, b) => a.id < b.id ? 1 : -1)
+                        .map((pendant) => (
                             <Box
-                                key={`letter-${letter.id}`}
+                                key={`pendant-${pendant.id}`}
                                 sx={{
                                     m: 0.5,
                                     borderRadius: 1,
@@ -56,14 +34,18 @@ const PendantSelectionPanel = ({ displayText, onPendantChange }) => {
                                         backgroundColor: "lightgray",
                                     },
                                 }}
-                                onClick={() => onPendantChange(letter)}
-                            >
-                                <Typography>{letter.id}</Typography>
+                                onClick={() => onPendantChange(pendant)}
+                            > <img
+                                    src={pendant.url}
+                                    alt={pendant.id}
+                                    objectFit="cover"
+                                    width="100%"
+                                    height="100%"
+                                />
                             </Box>
                         ))}
-                    </Stack>
-                </Stack>
-            </Stack>
+                </BlockStack>
+            </BlockStack>
         </Paper>
     );
 }

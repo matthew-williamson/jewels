@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import { Image, Layer, Stage } from "react-konva";
 import { authenticate } from "../shopify.server";
-import { alphabet } from "../constants";
 import PendantImage from "../PendantImage";
 import PendantSelectionPanel from "../PendantSelectionPanel";
 import useImage from "use-image";
@@ -70,10 +69,41 @@ export const action = async ({ request }) => {
     }    
   }`,
   );
-  const responseJson = await chainResponse.json();
-  console.log(responseJson);
+  const pendantResponse = await admin.graphql(
+    `#graphql
+  query {
+    collectionByHandle(handle: "pendants") {
+      id
+      title
+      handle
+      products(first: 250) {
+        edges {
+         node {
+            id
+            title
+            priceRangeV2 {
+              maxVariantPrice {
+                amount
+              }
+              minVariantPrice {
+                amount
+              }
+            }
+            featuredImage{
+              altText
+              url
+            }
+          }
+        }
+      }
+    }    
+  }`,
+  );
+  const chainResponseJson = await chainResponse.json();
+  const pendantResponseJson = await pendantResponse.json();
   return json({
-    product: responseJson.data.collectionByHandle,
+    chainCollection: chainResponseJson.data.collectionByHandle,
+    pendantCollection: pendantResponseJson.data.collectionByHandle
   });
 };
 
@@ -93,36 +123,42 @@ export default function Index() {
   }
 
   const UpdateChainUrls = () => {
-    if (actionData == null || actionData.product == null ||
-      actionData.product.products == null ||
-      actionData.product.products.edges == null) {
+    if (actionData == null) {
       return [];
     }
     // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
-    return actionData.product.products.edges.map(selectProductUrlImages);
+    return actionData.chainCollection.products.edges.map(selectProductUrlImages);
   }
+  const UpdatePendantUrls = () => {
+    if (actionData == null) {
+      return [];
+    }
+    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
+    return actionData.pendantCollection.products.edges.map(selectProductUrlImages);
+  }
+
   const generateProduct = () => submit({}, { replace: true, method: "POST" });
   useEffect(() => {
     generateProduct();
   }, []);
 
   var chains = UpdateChainUrls();
-
-
+  var pendants = UpdatePendantUrls();
+  const blankObj = { id: '', url: '', amount: 0 };
   const [price, setPrice] = useState(99);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
-  const [centerpiece, setCenterpiece] = useState(alphabet.A);
-  const [leftpiece, setLeftpiece] = useState(alphabet.A);
-  const [rightpiece, setRightpiece] = useState(alphabet.A);
-  const [chain, setChain] = useState(chains == null || chains.length == 0 ? { id: '', url: '', amount: 0 } : chains[0]);
-  const [letter, setLetter] = useState(alphabet.A);
+  const [centerpiece, setCenterpiece] = useState(blankObj);
+  const [leftpiece, setLeftpiece] = useState(blankObj);
+  const [rightpiece, setRightpiece] = useState(blankObj);
+  const [chain, setChain] = useState(chains == null || chains.length == 0 ? blankObj : chains[0]);
+  const [letter, setLetter] = useState(blankObj);
 
 
   //useEffect only runs setPrice when [] list updates any values
   useEffect(() => {
-    setPrice(chain.amount + centerpiece.price + leftpiece.price + rightpiece.price + (isAddingPersonalNote === true ? 2 : 0));
-  }, [chain.amount, centerpiece.price, leftpiece.price, rightpiece.price, isAddingPersonalNote]);
+    setPrice(chain.amount + centerpiece.amount + leftpiece.amount + rightpiece.amount + (isAddingPersonalNote === true ? 2 : 0));
+  }, [chain.amount, centerpiece.amount, leftpiece.amount, rightpiece.amount, isAddingPersonalNote]);
 
   //useCallback only calculates function (input,output dictionary values)
   //when a dependency value changes
@@ -157,17 +193,27 @@ export default function Index() {
   const handlePersonalNoteChange = useCallback((e) => {
     setPersonalNote(e.target.value);
   }, []);
-  function test() {
+  function UpdateChain() {
     if (!chain || chain.id == '') {
       setChain(chains[0]);
+    }
+  }
+  function UpdatePendants() {
+    if (!centerpiece || centerpiece.id == '') {
+      setCenterpiece(pendants[0]);
     }
   }
   useEffect(() => {
     if (chains.length > 0) {
       console.log("chains updated");
       console.log(chains);
-      test()
+      UpdateChain()
     }
+    // if (pendants.length > 0) {
+    //   console.log("pendants updated");
+    //   console.log(pendants);
+    //   UpdatePendants()
+    // }
   }, [chains]);
 
   // const LoadPage = () => submit({}, { replace: true, method: "POST" });
@@ -208,7 +254,7 @@ export default function Index() {
                           </Layer>
                           {/*centerpiece*/}
                           <PendantImage
-                            newSrc={alphabet[centerpiece.id].src}
+                            newSrc={centerpiece?.url}
                             newWidth={300}
                             newHeight={300}
                             newX={100}
@@ -217,7 +263,7 @@ export default function Index() {
                           />
                           {/*leftpiece*/}
                           <PendantImage
-                            newSrc={alphabet[leftpiece.id].src}
+                            newSrc={leftpiece?.url}
                             newWidth={300}
                             newHeight={300}
                             newX={180}
@@ -226,7 +272,7 @@ export default function Index() {
                           />
                           {/*rightpiece*/}
                           <PendantImage
-                            newSrc={alphabet[rightpiece.id].src}
+                            newSrc={rightpiece?.url}
                             newWidth={300}
                             newHeight={300}
                             newX={100}
@@ -293,7 +339,18 @@ export default function Index() {
                     </Paper>
                     <PendantSelectionPanel
                       displayText={"Step 2: Choose your centerpiece"}
+                      pendantOptions={pendants}
                       onPendantChange={handleOnCenterpieceChange}
+                    />
+                    <PendantSelectionPanel
+                      displayText={"Step 3: Choose your leftpiece"}
+                      pendantOptions={pendants}
+                      onPendantChange={handleOnLeftpieceChange}
+                    />
+                    <PendantSelectionPanel
+                      displayText={"Step 4: Choose your rightpiece"}
+                      pendantOptions={pendants}
+                      onPendantChange={handleOnRightpieceChange}
                     />
                   </BlockStack>
                 </Layout.Section>

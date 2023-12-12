@@ -2,7 +2,7 @@
 
 name = "jewelery-customizer"
 client_id = "ca7fdd742942060d1df68ad05994e403"
-application_url = "https://unusual-elder-joint-assistance.trycloudflare.com"
+application_url = "https://extends-syndicate-silence-municipal.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://unusual-elder-joint-assistance.trycloudflare.com/auth/callback",
-  "https://unusual-elder-joint-assistance.trycloudflare.com/auth/shopify/callback",
-  "https://unusual-elder-joint-assistance.trycloudflare.com/api/auth/callback",
-  "https://unusual-elder-joint-assistance.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://extends-syndicate-silence-municipal.trycloudflare.com/auth/callback",
+  "https://extends-syndicate-silence-municipal.trycloudflare.com/auth/shopify/callback",
+  "https://extends-syndicate-silence-municipal.trycloudflare.com/api/auth/callback",
+  "https://extends-syndicate-silence-municipal.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
