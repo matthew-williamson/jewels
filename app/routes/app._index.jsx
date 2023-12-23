@@ -2,16 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { json } from "@remix-run/node";
 import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
 import {
-  Page,
   Layout,
-  Text,
-  Card,
   Button,
   BlockStack,
   Box,
-  List,
-  Link,
-  InlineStack,
 } from "@shopify/polaris";
 import {
   Checkbox,
@@ -19,7 +13,6 @@ import {
   Stack,
   TextField,
   Typography,
-  collapseClasses,
 } from "@mui/material";
 import { Image, Layer, Stage } from "react-konva";
 import { authenticate } from "../shopify.server";
@@ -107,6 +100,36 @@ export const action = async ({ request }) => {
   });
 };
 
+export const CreateBundleForCart = async ({ ProductInput }) => {
+  console.log(ProductInput);
+  const { admin } = await authenticate.admin(ProductInput);
+  const resp = await admin.graphql(
+    `#graphql
+    mutation CreateProductBundle($input: ProductInput!) {
+  productCreate(input: $input) {
+    product {
+      title
+      variants(first: 10) {
+        edges{
+          node{
+            id
+            price
+          }
+        }
+      }
+    }
+    userErrors{
+      field
+      message
+    }
+  }
+  }`,
+  );
+  const pendantResponseJson = await resp.json();
+  return json({
+    bundle: resp.data.productCreate
+  });
+};
 export default function Index() {
   const nav = useNavigation();
   const actionData = useActionData();
@@ -122,43 +145,54 @@ export default function Index() {
     return { id, amount, url };
   }
 
-  const UpdateChainUrls = () => {
-    if (actionData == null) {
-      return [];
-    }
-    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
-    return actionData.chainCollection.products.edges.map(selectProductUrlImages);
-  }
-  const UpdatePendantUrls = () => {
-    if (actionData == null) {
-      return [];
-    }
-    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
-    return actionData.pendantCollection.products.edges.map(selectProductUrlImages);
-  }
-
-  const generateProduct = () => submit({}, { replace: true, method: "POST" });
-  useEffect(() => {
-    generateProduct();
-  }, []);
-
-  var chains = UpdateChainUrls();
-  var pendants = UpdatePendantUrls();
   const blankObj = { id: '', url: '', amount: 0 };
-  const [price, setPrice] = useState(99);
+  const [price, setPrice] = useState(0);
   const [isAddingPersonalNote, setIsAddingPersonalNote] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
   const [centerpiece, setCenterpiece] = useState(blankObj);
   const [leftpiece, setLeftpiece] = useState(blankObj);
   const [rightpiece, setRightpiece] = useState(blankObj);
   const [chain, setChain] = useState(chains == null || chains.length == 0 ? blankObj : chains[0]);
-  const [letter, setLetter] = useState(blankObj);
+
+  const UpdateChainUrls = () => {
+    if (actionData == null) {
+      return [];
+    }
+    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
+    var temp = actionData.chainCollection.products.edges.map(selectProductUrlImages);
+    if (chain == null) {
+      setChain(temp[0]);
+    }
+    return temp;
+  }
+  const UpdatePendantUrls = () => {
+    if (actionData == null) {
+      return [];
+    }
+    // actionData.product.products.edges.forEach((node) => node?.id.replace("gid://shopify/Product/", ""));
+    var temp = actionData.pendantCollection.products.edges.map(selectProductUrlImages);
+    if (centerpiece == null) {
+      setCenterpiece(temp[0]);
+    }
+    return temp;
+  }
+
+  const generateProduct = () => submit({}, { replace: true, method: "POST" });
+
+  useEffect(() => {
+    generateProduct();
+  }, []);
+
+  var chains = UpdateChainUrls();
+  var pendants = UpdatePendantUrls();
 
 
   //useEffect only runs setPrice when [] list updates any values
   useEffect(() => {
-    setPrice(chain.amount + centerpiece.amount + leftpiece.amount + rightpiece.amount + (isAddingPersonalNote === true ? 2 : 0));
+    setPrice(Number(chain.amount) + Number(centerpiece.amount) + Number(leftpiece.amount) +
+      Number(rightpiece.amount) + Number((isAddingPersonalNote === true ? 2 : 0)));
   }, [chain.amount, centerpiece.amount, leftpiece.amount, rightpiece.amount, isAddingPersonalNote]);
+
 
   //useCallback only calculates function (input,output dictionary values)
   //when a dependency value changes
@@ -168,22 +202,26 @@ export default function Index() {
 
   const handleOnLeftpieceChange = useCallback((newLeft) => {
     setLeftpiece(newLeft);
-  });
+  }, []);
 
   const handleOnRightpieceChange = useCallback((newRight) => {
     setRightpiece(newRight);
-  });
+  }, []);
   const handleOnChainChange = useCallback((newChain) => {
     setChain(newChain);
   }, []);
 
-  const handleOnLetterChange = useCallback((newLetter) => {
-    setLetter(newLetter);
-  });
-
   const onAddToCartClick = useCallback((e) => {
-    console.log("TODO");
-    submit();
+    CreateBundleForCart({
+      "input": {
+        "title": chain.title + centerpiece.title + leftpiece.title + rightpiece.title,
+        "variants": [
+          {
+            "price": price
+          }
+        ]
+      }
+    });
   }, []);
 
   const handleAddPersonalNoteChange = useCallback((e) => {
@@ -198,25 +236,13 @@ export default function Index() {
       setChain(chains[0]);
     }
   }
-  function UpdatePendants() {
-    if (!centerpiece || centerpiece.id == '') {
-      setCenterpiece(pendants[0]);
-    }
-  }
   useEffect(() => {
     if (chains.length > 0) {
       console.log("chains updated");
       console.log(chains);
       UpdateChain()
     }
-    // if (pendants.length > 0) {
-    //   console.log("pendants updated");
-    //   console.log(pendants);
-    //   UpdatePendants()
-    // }
   }, [chains]);
-
-  // const LoadPage = () => submit({}, { replace: true, method: "POST" });
   return (
     <Paper >
       <ui-title-bar title="Remix app template">
@@ -299,60 +325,62 @@ export default function Index() {
                     </Stack>
                   </Paper>
                 </Layout.Section>
-                <Layout.Section variant="oneThird">
-                  <BlockStack spacing={2}>
-                    <Paper sx={{ py: 2, px: 2 }}>
-                      <BlockStack spacing={1}>
-                        <Typography>Step 1: Choose your chain</Typography>
-                        <BlockStack spacing={1} direction="row">
-                          <Stack spacing={1} direction="row">
-                            {Object.values(chains).map((ch) => (
-                              <Box
-                                key={`chain-${ch.id}`}
-                                sx={{
-                                  m: 0.5,
-                                  borderRadius: 1,
-                                  border: "1px solid lightgray",
-                                  width: 25,
-                                  height: 25,
-                                  textAlign: "center",
-                                  alignItems: "center",
-                                  cursor: "pointer",
-                                  ":hover": {
-                                    backgroundColor: "lightgray",
-                                  },
-                                }}
-                                onClick={() => handleOnChainChange(ch)}
-                              >
-                                <img
-                                  src={ch.url}
-                                  alt={ch.id}
-                                  objectFit="cover"
-                                  width="100%"
-                                  height="100%"
-                                />
-                              </Box>
-                            ))}
-                          </Stack>
+                <Layout.Section variant="oneThird" height="100%">
+                  <div style={{ overflowY: "scroll" }}>
+                    <BlockStack spacing={2}>
+                      <Paper sx={{ py: 2, px: 2 }}>
+                        <BlockStack spacing={1}>
+                          <Typography>Step 1: Choose your chain</Typography>
+                          <BlockStack spacing={1} direction="row">
+                            <Stack spacing={1} direction="row">
+                              {Object.values(chains).map((ch) => (
+                                <Box
+                                  key={`chain-${ch.id}`}
+                                  sx={{
+                                    m: 0.5,
+                                    borderRadius: 1,
+                                    border: "1px solid lightgray",
+                                    width: 25,
+                                    height: 25,
+                                    textAlign: "center",
+                                    alignItems: "center",
+                                    cursor: "pointer",
+                                    ":hover": {
+                                      backgroundColor: "lightgray",
+                                    },
+                                  }}
+                                  onClick={() => handleOnChainChange(ch)}
+                                >
+                                  <img
+                                    src={ch.url}
+                                    alt={ch.id}
+                                    objectFit="cover"
+                                    width="100%"
+                                    height="100%"
+                                  />
+                                </Box>
+                              ))}
+                            </Stack>
+                          </BlockStack>
                         </BlockStack>
-                      </BlockStack>
-                    </Paper>
-                    <PendantSelectionPanel
-                      displayText={"Step 2: Choose your centerpiece"}
-                      pendantOptions={pendants}
-                      onPendantChange={handleOnCenterpieceChange}
-                    />
-                    <PendantSelectionPanel
-                      displayText={"Step 3: Choose your leftpiece"}
-                      pendantOptions={pendants}
-                      onPendantChange={handleOnLeftpieceChange}
-                    />
-                    <PendantSelectionPanel
-                      displayText={"Step 4: Choose your rightpiece"}
-                      pendantOptions={pendants}
-                      onPendantChange={handleOnRightpieceChange}
-                    />
-                  </BlockStack>
+                      </Paper>
+                      <PendantSelectionPanel
+                        displayText={"Step 2: Choose your centerpiece"}
+                        pendantOptions={pendants}
+                        onPendantChange={handleOnCenterpieceChange}
+                      />
+                      <PendantSelectionPanel
+                        displayText={"Step 3: Choose your leftpiece"}
+                        pendantOptions={pendants}
+                        onPendantChange={handleOnLeftpieceChange}
+                      />
+                      <PendantSelectionPanel
+                        displayText={"Step 4: Choose your rightpiece"}
+                        pendantOptions={pendants}
+                        onPendantChange={handleOnRightpieceChange}
+                      />
+                    </BlockStack>
+                  </div>
                 </Layout.Section>
               </Layout>
             </BlockStack>

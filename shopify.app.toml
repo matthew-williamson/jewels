@@ -2,7 +2,7 @@
 
 name = "jewelery-customizer"
 client_id = "ca7fdd742942060d1df68ad05994e403"
-application_url = "https://extends-syndicate-silence-municipal.trycloudflare.com"
+application_url = "https://correspondence-biol-pound-pens.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,17 +11,17 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://extends-syndicate-silence-municipal.trycloudflare.com/auth/callback",
-  "https://extends-syndicate-silence-municipal.trycloudflare.com/auth/shopify/callback",
-  "https://extends-syndicate-silence-municipal.trycloudflare.com/api/auth/callback",
-  "https://extends-syndicate-silence-municipal.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://correspondence-biol-pound-pens.trycloudflare.com/auth/callback",
+  "https://correspondence-biol-pound-pens.trycloudflare.com/auth/shopify/callback",
+  "https://correspondence-biol-pound-pens.trycloudflare.com/api/auth/callback",
+  "https://correspondence-biol-pound-pens.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
 api_version = "2023-10"
 
 [pos]
-embedded = false
+embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
